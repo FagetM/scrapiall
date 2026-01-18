@@ -4,12 +4,14 @@
   "description": "Web scraper and translator using n8n",
   "main": "index.js",
   "scripts": {
+    "scrape": "node scraper.js",
+    "scrape:example": "node scraper.js https://example.com",
+    "generate-site": "node scripts/generate-website.js",
+    "export-markdown": "node scripts/export-markdown.js",
     "start": "docker-compose up -d",
     "stop": "docker-compose down",
     "logs": "docker-compose logs -f n8n",
     "restart": "docker-compose restart",
-    "generate-site": "node scripts/generate-website.js",
-    "export-markdown": "node scripts/export-markdown.js",
     "n8n-local": "n8n start"
   },
   "keywords": [
