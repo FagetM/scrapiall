@@ -4,6 +4,7 @@
   "description": "Web scraper and translator using n8n",
   "main": "index.js",
   "scripts": {
+    "scrape:md": "node scraper-md.js",
     "scrape": "node scraper.js",
     "scrape:example": "node scraper.js https://example.com",
     "generate-site": "node scripts/generate-website.js",
