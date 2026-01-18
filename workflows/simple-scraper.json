@@ -1,0 +1,100 @@
+{
+  "name": "Simple Website Scraper (No Translation)",
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "url",
+              "value": "https://example.com"
+            }
+          ]
+        }
+      },
+      "id": "start-node",
+      "name": "Start",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "id": "fetch-node",
+      "name": "Fetch Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cheerio = require('cheerio');\nconst html = $input.first().json.data;\nconst url = $input.first().json.url;\n\nconst $ = cheerio.load(html);\n\n// Extract title\nconst title = $('title').text() || $('h1').first().text() || 'Untitled';\n\n// Extract content\nconst body = $('body').clone();\nbody.find('script, style, nav, header, footer').remove();\nconst content = body.text().replace(/\\s+/g, ' ').trim();\n\n// Extract all links\nconst links = [];\n$('a[href]').each((i, elem) => {\n  let href = $(elem).attr('href');\n  if (href.startsWith('/')) {\n    href = new URL(href, url).href;\n  }\n  links.push({\n    text: $(elem).text().trim(),\n    url: href\n  });\n});\n\nreturn [{\n  json: {\n    url,\n    title,\n    content,\n    contentLength: content.length,\n    links,\n    linksCount: links.length,\n    scrapedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "parse-node",
+      "name": "Parse HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/scraped_data/result.json",
+        "data": "={{ JSON.stringify($json, null, 2) }}",
+        "options": {}
+      },
+      "id": "save-node",
+      "name": "Save Result",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Fetch Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Page": {
+      "main": [
+        [
+          {
+            "node": "Parse HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse HTML": {
+      "main": [
+        [
+          {
+            "node": "Save Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "versionId": "1"
+}

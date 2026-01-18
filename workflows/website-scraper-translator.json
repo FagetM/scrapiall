@@ -1,0 +1,355 @@
+{
+  "name": "Website Scraper & Translator",
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "baseUrl",
+              "value": "https://example.com"
+            },
+            {
+              "name": "targetLanguage",
+              "value": "fr"
+            },
+            {
+              "name": "maxDepth",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config-node",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.baseUrl }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "initial-fetch",
+      "name": "Fetch Homepage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract all links from the page\nconst cheerio = require('cheerio');\nconst baseUrl = $input.first().json.baseUrl;\nconst html = $input.first().json.data;\n\nconst $ = cheerio.load(html);\nconst links = new Set();\n\n$('a[href]').each((i, elem) => {\n  let href = $(elem).attr('href');\n  \n  // Convert relative URLs to absolute\n  if (href.startsWith('/')) {\n    href = new URL(href, baseUrl).href;\n  } else if (!href.startsWith('http')) {\n    href = new URL(href, baseUrl).href;\n  }\n  \n  // Only include links from the same domain\n  if (href.startsWith(baseUrl)) {\n    links.add(href);\n  }\n});\n\nreturn Array.from(links).map(url => ({ json: { url, baseUrl } }));"
+      },
+      "id": "extract-links",
+      "name": "Extract All Links",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fetch-pages",
+      "name": "Fetch Each Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract content and structure from each page\nconst cheerio = require('cheerio');\nconst url = $input.first().json.url;\nconst html = $input.first().json.data;\nconst baseUrl = $input.first().json.baseUrl;\n\nconst $ = cheerio.load(html);\n\n// Extract page structure\nconst title = $('title').text() || $('h1').first().text() || 'Untitled';\nconst metaDescription = $('meta[name=\"description\"]').attr('content') || '';\n\n// Get relative path for categorization\nconst urlObj = new URL(url);\nconst relativePath = urlObj.pathname;\nconst pathParts = relativePath.split('/').filter(p => p);\n\n// Extract main content (try different selectors)\nlet content = '';\nconst contentSelectors = [\n  'article',\n  'main',\n  '.content',\n  '#content',\n  '.post',\n  '.article',\n  'body'\n];\n\nfor (const selector of contentSelectors) {\n  const element = $(selector).first();\n  if (element.length) {\n    // Remove scripts, styles, and nav elements\n    element.find('script, style, nav, header, footer, .nav, .menu').remove();\n    content = element.text().trim();\n    if (content.length > 100) break;\n  }\n}\n\n// If still no content, get body text\nif (!content || content.length < 100) {\n  const body = $('body').clone();\n  body.find('script, style, nav, header, footer, .nav, .menu').remove();\n  content = body.text().trim();\n}\n\n// Clean up whitespace\ncontent = content.replace(/\\s+/g, ' ').trim();\n\nreturn [{\n  json: {\n    url,\n    relativePath,\n    pathParts,\n    category: pathParts[0] || 'root',\n    subcategory: pathParts[1] || '',\n    title,\n    metaDescription,\n    content,\n    contentLength: content.length\n  }\n}];"
+      },
+      "id": "parse-content",
+      "name": "Parse Content & Structure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "split-content",
+      "name": "Split for Translation",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Translate content using a translation API or service\n// This is a placeholder - you'll need to integrate with an actual translation service\n// Options: OpenAI, DeepL, Google Translate, LibreTranslate\n\nconst item = $input.first().json;\nconst targetLanguage = 'fr';\n\n// For now, we'll mark content for translation\n// You can integrate with translation APIs in the next node\n\nreturn [{\n  json: {\n    ...item,\n    needsTranslation: true,\n    targetLanguage,\n    originalContent: item.content,\n    originalTitle: item.title\n  }\n}];"
+      },
+      "id": "prepare-translation",
+      "name": "Prepare Translation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-3.5-turbo\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un traducteur professionnel. Traduis le texte suivant en français de manière naturelle et fluide. Préserve la structure et le formatage.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Titre: {{ $json.originalTitle }}\\n\\nContenu: {{ $json.originalContent.substring(0, 3000) }}\"\n    }\n  ],\n  \"temperature\": 0.3\n}",
+        "options": {}
+      },
+      "id": "translate-openai",
+      "name": "Translate with OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 200],
+      "notes": "Nécessite une clé API OpenAI",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://translation.googleapis.com/language/translate/v2",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GOOGLE_TRANSLATE_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q\": [\"{{ $json.originalTitle }}\", \"{{ $json.originalContent }}\"],\n  \"target\": \"{{ $json.targetLanguage }}\",\n  \"format\": \"text\"\n}",
+        "options": {}
+      },
+      "id": "translate-google",
+      "name": "Translate with Google",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 400],
+      "notes": "Alternative gratuite avec limitations",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process translation results and prepare for saving\nconst item = $input.first().json;\n\n// Extract translated content\nlet translatedTitle = item.originalTitle;\nlet translatedContent = item.originalContent;\n\n// If OpenAI response\nif (item.choices && item.choices[0]) {\n  const response = item.choices[0].message.content;\n  // Parse the response to extract title and content\n  const titleMatch = response.match(/Titre:\\s*(.+?)\\n/);\n  const contentMatch = response.match(/Contenu:\\s*([\\s\\S]+)/);\n  \n  if (titleMatch) translatedTitle = titleMatch[1].trim();\n  if (contentMatch) translatedContent = contentMatch[1].trim();\n}\n\n// If Google Translate response\nif (item.data && item.data.translations) {\n  translatedTitle = item.data.translations[0].translatedText;\n  translatedContent = item.data.translations[1].translatedText;\n}\n\nreturn [{\n  json: {\n    url: item.url,\n    relativePath: item.relativePath,\n    pathParts: item.pathParts,\n    category: item.category,\n    subcategory: item.subcategory,\n    originalTitle: item.originalTitle,\n    translatedTitle,\n    originalContent: item.originalContent,\n    translatedContent,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "process-translation",
+      "name": "Process Translation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/scraped_data/{{ $json.category }}/{{ $json.relativePath.replace(/\\//g, '_') }}.json",
+        "data": "={{ JSON.stringify($json, null, 2) }}",
+        "options": {
+          "createDirectories": true
+        }
+      },
+      "id": "save-file",
+      "name": "Save to File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [2050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate summary report\nconst items = $input.all();\n\nconst summary = {\n  totalPages: items.length,\n  categories: {},\n  timestamp: new Date().toISOString(),\n  pages: items.map(item => ({\n    url: item.json.url,\n    category: item.json.category,\n    title: item.json.translatedTitle\n  }))\n};\n\n// Count by category\nitems.forEach(item => {\n  const cat = item.json.category;\n  summary.categories[cat] = (summary.categories[cat] || 0) + 1;\n});\n\nreturn [{ json: summary }];"
+      },
+      "id": "generate-summary",
+      "name": "Generate Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/scraped_data/summary.json",
+        "data": "={{ JSON.stringify($json, null, 2) }}",
+        "options": {}
+      },
+      "id": "save-summary",
+      "name": "Save Summary",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [2450, 300]
+    }
+  ],
+  "connections": {
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Fetch Homepage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Homepage": {
+      "main": [
+        [
+          {
+            "node": "Extract All Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract All Links": {
+      "main": [
+        [
+          {
+            "node": "Fetch Each Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Each Page": {
+      "main": [
+        [
+          {
+            "node": "Parse Content & Structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Content & Structure": {
+      "main": [
+        [
+          {
+            "node": "Split for Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split for Translation": {
+      "main": [
+        [
+          {
+            "node": "Prepare Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Translation": {
+      "main": [
+        [
+          {
+            "node": "Translate with OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Translate with Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate with OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Process Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate with Google": {
+      "main": [
+        [
+          {
+            "node": "Process Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Translation": {
+      "main": [
+        [
+          {
+            "node": "Save to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to File": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Summary": {
+      "main": [
+        [
+          {
+            "node": "Save Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "versionId": "1"
+}
