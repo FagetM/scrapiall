@@ -3,446 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Squash: Road to 3e Série</title>
+    <title>Squash 3e Série : L'Année Complète</title>
     <style>
         :root {
-            --primary: #c6ff00; /* Vert Squash */
+            --primary: #c6ff00;
             --dark: #121212;
-            --surface: #1e1e1e;
-            --surface-light: #2c2c2c;
+            --card-bg: #1e1e1e;
             --text: #e0e0e0;
             --danger: #ff4444;
-            --accent: #00bcd4;
+            --blue: #2979ff;
+            --purple: #d500f9;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--dark);
             color: var(--text);
-            margin: 0;
-            padding: 15px;
-            padding-bottom: 80px;
-            -webkit-font-smoothing: antialiased;
+            margin: 0; padding: 15px; padding-bottom: 100px;
         }
 
-        h1, h2, h3 { color: var(--primary); margin: 0; }
-        h1 { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        h3 { font-size: 1.1rem; }
+        h1, h2, h3 { margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .badge { background: #333; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: var(--primary); }
 
-        .header {
-            text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px;
+        .month-scroll { display: flex; overflow-x: auto; gap: 10px; margin-bottom: 20px; padding-bottom: 5px; scrollbar-width: none; }
+        .month-scroll::-webkit-scrollbar { display: none; }
+        .month-card {
+            min-width: 130px; background: #2c2c2c; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid transparent; opacity: 0.6; position: relative; flex-shrink: 0;
         }
+        .month-card.active { border-color: var(--primary); opacity: 1; background: #333; }
+        .month-card.locked { opacity: 0.3; pointer-events: none; }
+        .month-num { font-size: 1.2rem; font-weight: bold; color: white; display: block; margin-bottom: 2px;}
 
-        /* Navigation Semaines */
-        .week-nav { display: flex; gap: 5px; margin-bottom: 20px; background: var(--surface); padding: 5px; border-radius: 12px; }
-        .week-btn {
-            background: none; border: none; color: #666; padding: 10px 0; flex: 1;
-            font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
-        }
-        .week-btn.active { background: var(--primary); color: var(--dark); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .context-switch { margin-bottom: 20px; background: #252525; padding: 5px; border-radius: 20px; display: flex; }
+        .ctx-btn { flex: 1; border: none; background: none; color: #666; padding: 8px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .ctx-btn.active { background: var(--blue); color: white; }
 
-        /* Cartes Séances */
-        .card {
-            background-color: var(--surface); border-radius: 16px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #333;
-        }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .tag {
-            display: inline-block; background: var(--surface-light); padding: 4px 10px; border-radius: 6px;
-            font-size: 0.75rem; color: var(--accent); font-weight: bold; letter-spacing: 0.5px; margin-bottom: 15px;
-        }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
+        .card.tech-card { border-left: 4px solid var(--purple); background: #241e24; }
 
-        .exercise { border-bottom: 1px solid #333; padding: 12px 0; }
-        .exercise:last-child { border-bottom: none; }
+        .ex-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .ex-title { font-weight: bold; font-size: 1.1rem; color: white; margin-bottom: 5px; }
+        .ex-meta { color: #888; font-size: 0.9rem; }
 
-        /* Details / Summary pour les explications */
-        details { margin-top: 5px; }
-        summary {
-            cursor: pointer; color: #888; font-size: 0.85rem; list-style: none; outline: none;
-        }
-        summary::-webkit-details-marker { display: none; } /* Cache la flèche par défaut */
-        summary::after { content: " ℹ️ Voir la technique"; font-size: 0.8rem; }
-        details[open] summary::after { content: ""; }
+        input[type="number"] { background: #333; border: 1px solid #555; color: var(--primary); padding: 8px; width: 60px; border-radius: 6px; text-align: center; font-size: 1.1rem; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
+        .btn-tech { background: #333; color: #ccc; font-size: 0.8rem; padding: 5px 12px; border-radius: 4px; margin-top: 5px; cursor: pointer; border: none; }
+        .btn-yt { background: #cc0000; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; }
+        .btn-validate { background: var(--primary); color: black; }
 
-        .instruction {
-            background: var(--surface-light); padding: 10px; border-radius: 8px; margin-top: 8px;
-            font-size: 0.85rem; color: #ccc; line-height: 1.4; border-left: 3px solid var(--accent);
-        }
-        .instruction strong { color: white; }
+        .tech-drawer { display: none; background: #252525; padding: 10px; margin-top: 10px; border-radius: 8px; border-left: 3px solid var(--blue); font-size: 0.9rem; line-height: 1.5; }
+        .tech-drawer.open { display: block; }
 
-        /* Inputs */
-        .input-group { display: flex; align-items: center; gap: 10px; }
-        input[type="number"] {
-            background: #2a2a2a; border: 1px solid #444; color: var(--primary); font-weight: bold;
-            padding: 8px; width: 50px; border-radius: 6px; text-align: center; font-size: 1.1rem;
-        }
-        /* Checkbox Custom */
-        .checkbox-wrapper input { display: none; }
-        .checkbox-wrapper label {
-            width: 24px; height: 24px; border: 2px solid #555; border-radius: 6px; display: block; cursor: pointer; position: relative;
-        }
-        .checkbox-wrapper input:checked + label { background: var(--primary); border-color: var(--primary); }
-        .checkbox-wrapper input:checked + label::after {
-            content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: black; font-weight: bold;
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #222; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--primary); }
 
-        /* Timer Section */
-        .timer-box {
-            text-align: center; border: 2px solid #444; border-radius: 12px; padding: 20px; margin-top: 15px; background: #1a1a1a;
-        }
-        .time-display { font-size: 3.5rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; margin: 10px 0; }
-        .timer-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .timer-controls button {
-            padding: 12px; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase;
-        }
-        .btn-start { background-color: var(--primary); color: black; box-shadow: 0 0 15px rgba(198, 255, 0, 0.2); }
-        .btn-stop { background-color: var(--surface-light); color: var(--danger); border: 1px solid var(--danger); }
-
-        .status { font-size: 1rem; font-weight: bold; letter-spacing: 1px; color: #888; }
-        .progress-bar { height: 8px; background: #333; border-radius: 4px; margin-top: 15px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s linear; }
-
+        .progress-bar { height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; width: 100%; }
+        .progress-val { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Squash <span style="color:white">///</span> Physique</h1>
-    <p style="color:#888; font-size:0.9rem; margin-top:5px">Programme d'endurance de force</p>
+    <div>
+        <h1 style="color:white">SQUASH<span style="color:var(--primary)">.PRO</span></h1>
+        <small style="color:#888">Road to 3e Série • 12 Mois</small>
+    </div>
+    <div style="text-align:right">
+        <div class="badge" id="userLevelDisplay">MOIS 1</div>
+        <div style="font-size:0.7rem; color:#666; margin-top:2px" id="totalProg">0% Complété</div>
+    </div>
 </div>
 
-<div class="week-nav" id="weekNav"></div>
+<div class="context-switch">
+    <button class="ctx-btn active" onclick="setContext('home')" id="btnHome">🏠 Maison / Gym</button>
+    <button class="ctx-btn" onclick="setContext('court')" id="btnCourt">🎾 Terrain Squash</button>
+</div>
 
-<div id="appContent">
+<div class="month-scroll" id="monthNav"></div>
+
+<div id="appContent"></div>
+
+<div id="validationModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" style="color:var(--primary)">Fin du Mois</h2>
+        <p style="color:#ccc; margin: 15px 0;">As-tu atteint tes objectifs ?</p>
+
+        <div style="text-align:left; background:#333; padding:15px; border-radius:8px; margin-bottom:20px; font-size:0.9rem">
+            <div style="margin-bottom:10px">🏋️ <strong>Physique :</strong> <span id="modalGoalPhys"></span></div>
+            <div>🎯 <strong>Technique :</strong> <span id="modalGoalTech"></span></div>
+        </div>
+
+        <button class="btn btn-validate" onclick="processValidation(true)">✅ OUI, Mois Validé</button>
+        <button class="btn" style="background:#333; color:white" onclick="processValidation(false)">❌ NON, je redouble</button>
     </div>
+</div>
 
 <script>
-    // --- DATA : Configuration du programme ---
-    const programData = {
-        1: {
-            title: "Semaine 1 : Choc",
-            hiit: { work: 15, rest: 15, reps: 20, sets: 2 }, // 2 blocs de 5 min
-            weights: { fentes: 12, squat: 20 },
-            desc: "On casse les fibres. Ça va faire mal aux jambes (J+2)."
-        },
-        2: {
-            title: "Semaine 2 : Volume",
-            hiit: { work: 15, rest: 15, reps: 24, sets: 2 }, // 2 blocs de 6 min
-            weights: { fentes: 12, squat: 20 },
-            desc: "On augmente le volume cardio. Les muscles s'habituent."
-        },
-        3: {
-            title: "Semaine 3 : Intensité",
-            hiit: { work: 30, rest: 20, reps: 14, sets: 2 }, // 2 blocs de 7 min en 30/20 (dur)
-            weights: { fentes: 14, squat: 22 },
-            desc: "Charges plus lourdes + Cardio plus long. Semaine la plus dure."
-        },
-        4: {
-            title: "Semaine 4 : Deload",
-            hiit: { work: 15, rest: 15, reps: 20, sets: 1 }, // Juste 1 bloc léger
-            weights: { fentes: 10, squat: 16 },
-            desc: "Récupération active. On refait du jus avant le test."
-        }
+    const DB = {
+        months: [
+            {
+                id: 1, name: "Janvier", focus: "Endurance & Longueur",
+                goal_desc: "Supporter la brûlure et trouver la longueur.",
+                test_phys: "8 Fentes Bulgares @ 16kg",
+                test_tech: "50 Parallèles CD & Revers sans faute (zone arrière)",
+                tech_challenge: {
+                    name: "La Gamme 'Rail'",
+                    desc: "Tu dois faire 50 frappes parallèles d'affilée qui retombent derrière la ligne de service. Si tu rates (tôle ou court), tu repars à 0.",
+                    home_desc: "Shadow Swing face au miroir : 100 répétitions techniques parfaites (focus : raquette haute)."
+                },
+                sessions: [
+                    {
+                        title: "Physique", exercises: [
+                            { name: "Fentes Bulgares", equipment: {home: "Sac lesté", court: "Haltères"}, target: "3x8 / jambe", tech: "Contrôle la descente sur 3 secondes." },
+                            { name: "HIIT Navettes", equipment: {home: "Burpees", court: "Poids de corps"}, target: "15s/15s pendant 10min", tech: "Sprint max, arrêt net." }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2, name: "Février", focus: "Puissance & Largeur",
+                goal_desc: "Frapper fort et utiliser les croisés.",
+                test_phys: "Saut longueur > 2m20",
+                test_tech: "30 Croisés (Cross-court) qui meurent au fond",
+                tech_challenge: {
+                    name: "La Gamme 'Essuie-Glace'",
+                    desc: "Depuis le T : 1 Volée CD, 1 Volée Revers. La balle ne doit pas toucher le sol. Tiens 20 échanges contre le mur.",
+                    home_desc: "Renforcement poignet : 3 séries de 1min de 'figure 8' avec la raquette dans le vide."
+                },
+                sessions: [
+                    {
+                        title: "Physique", exercises: [
+                            { name: "Goblet Squat", equipment: {home: "Kettlebell", court: "Poids"}, target: "4x10 Lourd", tech: "Explosif à la remontée." },
+                            { name: "Sauts Box Jump", equipment: {home: "Saut groupé", court: "Banc"}, target: "5x5 Max Hauteur", tech: "Réception silencieuse." }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 3, name: "Mars", focus: "Vitesse & Boast",
+                goal_desc: "Exploser vers l'avant et attaquer.",
+                test_phys: "Ghosting 6 coins : 20 reps < 40sec",
+                test_tech: "Boast-Drive : 3min sans faute",
+                tech_challenge: {
+                    name: "Le 'Boast-Drive' Solo",
+                    desc: "Tu fais un Boast, tu cours devant, tu fais un Drive (lobé), tu repars au T. Répète en continu.",
+                    home_desc: "Fentes avant explosives (alternées) : 50 répétitions le plus vite possible."
+                },
+                sessions: [
+                    {
+                        title: "Physique", exercises: [
+                            { name: "Sprint 10m départ arrêté", equipment: {home: "Sprint sur place", court: "Court"}, target: "10 x 1 sprint", tech: "Le premier pas doit être immense." }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 4, name: "Avril", focus: "Volée & Réflexes",
+                goal_desc: "Prendre la balle tôt, couper les trajectoires.",
+                test_phys: "Gainage dynamique : 3min sans pose",
+                test_tech: "100 Volées contre le mur (distance 1m)",
+                tech_challenge: {
+                    name: "Volée Murale Mitraillette",
+                    desc: "Mets-toi à 1m du mur. Volée CD en continu. La balle ne doit pas descendre sous la ligne de service. Objectif 50 de suite.",
+                    home_desc: "Juggling : Faire rebondir la balle sur la tranche de la raquette (précision)."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Pompes Claquées", target: "4x8 Explosif", tech: "Mains décollent du sol à chaque rep." }] }]
+            },
+            {
+                id: 5, name: "Mai", focus: "Ghosting & Déplacement",
+                goal_desc: "Fluidité totale. On ne court plus, on glisse.",
+                test_phys: "Test Navette Luc Léger (Palier 10)",
+                test_tech: "Ghosting aléatoire (Appli) : 20min",
+                tech_challenge: {
+                    name: "Ghosting Précision",
+                    desc: "Place 4 balles dans les coins. Va toucher une balle délicatement (sans la faire bouger) et reviens au T.",
+                    home_desc: "Visualisation : Ferme les yeux, joue un match entier dans ta tête en sentant les mouvements."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Fentes sautées", target: "3x20 total", tech: "Alterner jambe gauche/droite en l'air." }] }]
+            },
+            {
+                id: 6, name: "Juin", focus: "Endurance de Match",
+                goal_desc: "Simuler des matchs en 5 jeux.",
+                test_phys: "2 x (15 x 45sec Effort / 15sec Repos)",
+                test_tech: "Match à condition : Gagner en jouant tout au fond",
+                tech_challenge: {
+                    name: "Le Jeu de la Longueur",
+                    desc: "Match d'entraînement : Toute balle qui rebondit avant la ligne médiane est 'Faute'. Oblige à jouer long.",
+                    home_desc: "Analyse vidéo : Regarde un match de Gawad et note ses placements au T."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Suicides (Lignes)", target: "4 séries de 3min", tech: "Toucher chaque ligne avec la main." }] }]
+            },
+            {
+                id: 7, name: "Juillet", focus: "Défense & Lob",
+                goal_desc: "Sortir de la pression quand on est débordé.",
+                test_phys: "Chaise : 3 x 2min",
+                test_tech: "10 Lobs croisés parfaits de suite",
+                tech_challenge: {
+                    name: "La Statue Défensive",
+                    desc: "L'adversaire te fait des boast/amortis. Tu dois UNIQUEMENT lober pour remettre la balle au fond.",
+                    home_desc: "Souplesse : Grand écart et mobilité de hanche pour aller chercher bas."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Squat isométrique", target: "Tenir en bas 5s à chaque rep", tech: "Cuisses parallèles au sol." }] }]
+            },
+            {
+                id: 8, name: "Août", focus: "Attaque & Amortie",
+                goal_desc: "Finir le point quand l'ouverture est là.",
+                test_phys: "Sprint court répété",
+                test_tech: "10 Nick (Amorties) réussis sur 20 tentatives",
+                tech_challenge: {
+                    name: "Le Tueur de Nick",
+                    desc: "Envoie la balle sur le mur frontal, laisse rebondir, tente l'amortie qui roule (Nick).",
+                    home_desc: "Renforcement doigts : Serrer une balle anti-stress fort pour le grip."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Burpees Chest-to-floor", target: "100 le plus vite possible", tech: "Poitrine touche le sol." }] }]
+            },
+            {
+                id: 9, name: "Septembre", focus: "Feinte & Deception",
+                goal_desc: "Masquer sa frappe, fixer l'adversaire.",
+                test_phys: "Coordination échelle de rythme",
+                test_tech: "Gagner un point sur une feinte de corps",
+                tech_challenge: {
+                    name: "L'Arnaque",
+                    desc: "Prépare comme pour faire un Drive violent, et au dernier moment : Amortie délicate. Répète le geste.",
+                    home_desc: "Travail devant miroir : Dissocier le haut du corps (fake) et le bas."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Gainage Rotation", target: "3x1min par côté", tech: "Hanches stables, rotation thoracique." }] }]
+            },
+            {
+                id: 10, name: "Octobre", focus: "Tactique & Analyse",
+                goal_desc: "Jouer avec sa tête, pas ses jambes.",
+                test_phys: "Repos actif / Maintien",
+                test_tech: "Match : Annoncer à voix haute où on va tirer avant de frapper",
+                tech_challenge: {
+                    name: "Échecs Squash",
+                    desc: "Match à thème : Tu n'as le droit de tirer QUE là où l'adversaire n'est pas.",
+                    home_desc: "Stratégie : Écrire son plan de jeu type pour le tournoi."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Footing léger + Accélérations", target: "30 min", tech: "10 accélérations de 10sec pendant le footing." }] }]
+            },
+            {
+                id: 11, name: "Novembre", focus: "Intensité Max",
+                goal_desc: "Prépa commando avant la fin d'année.",
+                test_phys: "Test Cooper (12min)",
+                test_tech: "Match contre plus fort : Marquer 8 points/jeu",
+                tech_challenge: {
+                    name: "Le 2 contre 1",
+                    desc: "Joue contre 2 adversaires (ou 1 qui a le droit aux couloirs et toi non). Survis.",
+                    home_desc: "HIIT Mental : Visualise un échange dur, fais 10 pompes, visualise le calme."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Circuit Training Complet", target: "3 tours à fond", tech: "Enchaîner tous les exos des mois précédents." }] }]
+            },
+            {
+                id: 12, name: "Décembre", focus: "Tournoi & Bilan",
+                goal_desc: "Tout lâcher. Objectif classement.",
+                test_phys: "Aucun (Fraîcheur)",
+                test_tech: "Gagner le Tournoi de Noël du club",
+                tech_challenge: {
+                    name: "Maintien Gammes",
+                    desc: "Fais tes gammes préférées (Parallèles) juste pour le feeling et la confiance.",
+                    home_desc: "Repos et Sommeil."
+                },
+                sessions: [{ title: "Physique", exercises: [{ name: "Étirements & Rouleau", target: "Tous les jours", tech: "15min de récupération active." }] }]
+            }
+        ]
     };
 
-    // State management
-    let currentWeek = 1;
-    let userState = JSON.parse(localStorage.getItem('squashApp_v2')) || {
-        completed: {},
-        weights: {}
+    let state = JSON.parse(localStorage.getItem('squashPro_year_v1')) || {
+        currentMonth: 1,
+        context: 'home',
+        logs: {}
     };
 
-    const navContainer = document.getElementById('weekNav');
-    const contentContainer = document.getElementById('appContent');
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    // --- SOUND ENGINE ---
-    function playBeep(type) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        const now = audioCtx.currentTime;
-
-        if (type === 'go') {
-            // Son aigu et montant pour GO (880Hz -> 1200Hz)
-            osc.frequency.setValueAtTime(880, now);
-            osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-            osc.start(now);
-            osc.stop(now + 0.4);
-        } else if (type === 'rest') {
-            // Son grave descendant pour REPOS (400Hz -> 200Hz)
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.linearRampToValueAtTime(200, now + 0.2);
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-            osc.start(now);
-            osc.stop(now + 0.4);
-        } else if (type === 'countdown') {
-            // Petit bip sec
-            osc.frequency.value = 600;
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            osc.start(now);
-            osc.stop(now + 0.1);
-        } else if (type === 'end') {
-            // Victoire
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(523.25, now); // Do
-            osc.frequency.setValueAtTime(659.25, now + 0.2); // Mi
-            osc.frequency.setValueAtTime(783.99, now + 0.4); // Sol
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.linearRampToValueAtTime(0, now + 1.5);
-            osc.start(now);
-            osc.stop(now + 1.5);
-        }
+    function init() {
+        renderNav();
+        renderContent();
+        updateUI();
     }
 
-    // --- RENDER FUNCTIONS ---
+    function setContext(ctx) {
+        state.context = ctx;
+        document.getElementById('btnHome').className = ctx === 'home' ? 'ctx-btn active' : 'ctx-btn';
+        document.getElementById('btnCourt').className = ctx === 'court' ? 'ctx-btn active' : 'ctx-btn';
+        localStorage.setItem('squashPro_year_v1', JSON.stringify(state));
+        renderContent();
+    }
+
     function renderNav() {
-        navContainer.innerHTML = '';
-        [1, 2, 3, 4].forEach(w => {
-            const btn = document.createElement('button');
-            btn.className = `week-btn ${w === currentWeek ? 'active' : ''}`;
-            btn.innerText = `SEM ${w}`;
-            btn.onclick = () => { currentWeek = w; renderApp(); };
-            navContainer.appendChild(btn);
+        const nav = document.getElementById('monthNav');
+        nav.innerHTML = '';
+        DB.months.forEach(m => {
+            const btn = document.createElement('div');
+            let statusClass = '';
+            if (m.id === state.currentMonth) statusClass = 'active';
+            if (m.id > state.currentMonth) statusClass = 'locked';
+
+            btn.className = `month-card ${statusClass}`;
+            btn.innerHTML = `<span class="month-num">${m.id}</span><strong>${m.name}</strong><br><small style="font-size:0.7rem">${m.focus}</small>`;
+
+            if (m.id < state.currentMonth) {
+                btn.innerHTML += `<div style="color:var(--primary); font-size:1.2rem; margin-top:5px">✓</div>`;
+            }
+
+            btn.onclick = () => { if(m.id <= state.currentMonth) { state.viewMonth = m.id; renderContent(m.id); }};
+            nav.appendChild(btn);
         });
     }
 
-    function renderApp() {
-        renderNav();
-        const data = programData[currentWeek];
-        const wKey = `w${currentWeek}`;
+    function renderContent(forceMonthId = null) {
+        const monthId = forceMonthId || state.currentMonth;
+        const m = DB.months.find(month => month.id === monthId);
+        const container = document.getElementById('appContent');
 
-        const wFentes = userState.weights[`${wKey}_fentes`] || data.weights.fentes;
-        const wSquat = userState.weights[`${wKey}_squat`] || data.weights.squat;
-
-        contentContainer.innerHTML = `
-            <div style="text-align:center; margin-bottom:20px">
-                <h2>${data.title}</h2>
-                <p style="color:#888; font-size:0.9rem; margin-top:5px">"${data.desc}"</p>
+        let html = `
+            <div style="margin-bottom:20px; border-left:4px solid var(--primary); padding-left:15px">
+                <h2 style="color:white; text-transform:uppercase">${m.name}</h2>
+                <div style="color:var(--primary); font-weight:bold; margin-bottom:5px">${m.focus}</div>
+                <p style="color:#aaa; font-size:0.9rem">"${m.goal_desc}"</p>
             </div>
+        `;
 
-            <div class="card">
-                <div class="card-header">
-                    <h3>🏋️ Lundi : Force</h3>
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="${wKey}_d1" ${userState.completed[`${wKey}_d1`] ? 'checked' : ''} onchange="toggleDone('${wKey}_d1')">
-                        <label for="${wKey}_d1"></label>
+        const techDesc = state.context === 'court' ? m.tech_challenge.desc : m.tech_challenge.home_desc;
+        const techTitle = state.context === 'court' ? m.tech_challenge.name : m.tech_challenge.name + " (Version Solo)";
+
+        html += `
+            <div class="card tech-card">
+                <div class="ex-header">
+                    <div>
+                        <div class="ex-title" style="color:var(--purple)">🎯 Challenge Technique</div>
+                        <div style="font-size:1.1rem; font-weight:bold; margin:5px 0; color:white">${techTitle}</div>
                     </div>
                 </div>
-                <div class="tag">Jambes & Lactique • 45 min</div>
-
-                <div class="exercise">
-                    <div style="display:flex; justify-content:space-between; align-items:center">
-                        <span><strong>1. Fentes Bulgares</strong> (x6/jambe)</span>
-                        <div class="input-group">
-                            <input type="number" value="${wFentes}" onchange="saveWeight('${wKey}_fentes', this.value)"> <span>kg</span>
-                        </div>
-                    </div>
-                    <details>
-                        <summary></summary>
-                        <div class="instruction">
-                            <strong>Technique :</strong> Un pied en arrière sur un banc/chaise. Dos droit. Descendez lentement en 3 secondes, remontez de façon explosive.<br>
-                            <strong>Poids :</strong> Charge dans CHAQUE main. Si trop facile à 6 reps, augmentez le poids, pas les reps.
-                        </div>
-                    </details>
+                <div style="font-size:0.9rem; color:#ddd; line-height:1.4; background:#00000040; padding:10px; border-radius:6px">
+                    ${techDesc}
                 </div>
-
-                <div class="exercise">
-                    <div style="display:flex; justify-content:space-between; align-items:center">
-                        <span><strong>2. Goblet Squat</strong> (x10)</span>
-                        <div class="input-group">
-                            <input type="number" value="${wSquat}" onchange="saveWeight('${wKey}_squat', this.value)"> <span>kg</span>
-                        </div>
-                    </div>
-                    <details>
-                        <summary></summary>
-                        <div class="instruction">
-                            <strong>Technique :</strong> Tenez l'haltère contre votre poitrine. Pieds largeur épaules. Descendez les fesses sous les genoux.<br>
-                            <strong>Tempo :</strong> Constant, pas de pause en haut.
-                        </div>
-                    </details>
-                </div>
-
-                <div class="exercise">
-                    <div><strong>3. Burpees (Sans pompe)</strong> (x10)</div>
-                    <details>
-                        <summary></summary>
-                        <div class="instruction">
-                            <strong>Technique :</strong> Posez les mains, jetez les pieds derrière, ramenez les pieds, sautez. <br>
-                            <strong>Intensité :</strong> Vitesse maximale. C'est le cardio du circuit.
-                        </div>
-                    </details>
-                </div>
-
-                <p style="text-align:center; font-style:italic; color:#666; font-size:0.9rem; margin-top:15px">
-                    Enchaîner 1+2+3 sans pause.<br>Repos 2min30.<br>Faire 4 à 5 Tours.
-                </p>
-
-                <div class="exercise" style="border-top:1px dashed #444; margin-top:15px; padding-top:15px">
-                    <strong>Finisher Gainage (3 tours) :</strong><br>
-                    • Russian Twist (10kg) x20 touches<br>
-                    • Planche Commando x10
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3>🫁 Mercredi : HIIT</h3>
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="${wKey}_d2" ${userState.completed[`${wKey}_d2`] ? 'checked' : ''} onchange="toggleDone('${wKey}_d2')">
-                        <label for="${wKey}_d2"></label>
-                    </div>
-                </div>
-                <div class="tag">Navettes & Apnée • 35 min</div>
-
-                <div class="exercise">
-                    <strong>Le "Suicide" (Navettes)</strong><br>
-                    <span style="color:#888; font-size:0.9rem">Aller-Retour Ligne Médiane + Aller-Retour Mur Frontal.</span>
-                    <details>
-                        <summary></summary>
-                        <div class="instruction">
-                            <strong>Objectif :</strong> Faire monter le cœur au maximum et s'arrêter net. <br>
-                            <strong>Surface :</strong> Court de squash ou parking (10m). Touchez le sol avec la main à chaque demi-tour.
-                        </div>
-                    </details>
-                </div>
-
-                <div class="timer-box">
-                    <span id="timerStatus" class="status">PRÊT ?</span>
-                    <div id="timerDisplay" class="time-display">00:00</div>
-                    <div class="progress-bar"><div id="timerBar" class="progress-fill"></div></div>
-
-                    <div class="timer-controls">
-                        <button class="btn-start" onclick="startHIIT(${data.hiit.work}, ${data.hiit.rest}, ${data.hiit.reps})">GO !</button>
-                        <button class="btn-stop" onclick="stopTimer()">STOP</button>
-                    </div>
-                    <p style="font-size:0.8rem; margin-top:10px; color:#666">
-                        Série : ${data.hiit.work}s Sprint / ${data.hiit.rest}s Repos<br>
-                        Volume : ${data.hiit.sets} Blocs de ${data.hiit.reps} intervalles
-                    </p>
-                </div>
-
-                <div class="exercise" style="margin-top:20px; background: #2a1a1a; padding:10px; border-radius:8px; border:1px solid #442222">
-                    <strong style="color:#ff8888">POST-SEANCE : Hypoxie</strong><br>
-                    <p style="margin:5px 0; font-size:0.9rem">
-                        Marcher. Vider les poumons. Bloquer. Marcher 15 pas. Respirer.<br>
-                        <em>(Faire 10 fois pour calmer le système nerveux)</em>
-                    </p>
+                <div style="margin-top:10px; font-size:0.8rem; color:#888">
+                    <em>Objectif : À valider 1 fois par semaine.</em>
                 </div>
             </div>
         `;
+
+        if (m.sessions) {
+            m.sessions.forEach((sess, sIndex) => {
+                html += `<h3 style="margin-top:20px; margin-bottom:10px; color:var(--blue)">${sess.title}</h3>`;
+
+                sess.exercises.forEach((ex, exIndex) => {
+                    const exID = `m${m.id}_s${sIndex}_ex${exIndex}`;
+                    const savedVal = state.logs[exID] || "";
+
+                    let displayEquip = ex.equipment ? ex.equipment[state.context] : "Poids du corps";
+
+                    html += `
+                    <div class="card">
+                        <div class="ex-header">
+                            <div>
+                                <div class="ex-title">${ex.name}</div>
+                                <div class="ex-meta">Matos : <span style="color:white">${displayEquip}</span></div>
+                                <div class="ex-meta">Cible : <span style="color:var(--primary)">${ex.target}</span></div>
+                            </div>
+                            <input type="number" placeholder="Perf" value="${savedVal}"
+                                onchange="saveLog('${exID}', this.value)">
+                        </div>
+
+                        <div style="display:flex; align-items:center; margin-top:10px">
+                            <button class="btn-tech" onclick="toggleTech('${exID}')">👁️ Voir Détails</button>
+                            <a href="https://www.youtube.com/results?search_query=squash+${encodeURIComponent(ex.name)}+exercise" target="_blank" class="btn-yt">📺 YouTube</a>
+                        </div>
+
+                        <div id="tech_${exID}" class="tech-drawer">
+                            ${ex.tech || "Faire le mouvement avec contrôle."}
+                        </div>
+                    </div>`;
+                });
+            });
+        }
+
+        if (monthId === state.currentMonth) {
+            html += `
+                <div style="margin-top:40px; padding-bottom:30px; text-align:center">
+                    <button class="btn btn-validate" onclick="openValidation(${m.id})">🏆 VALIDER LE MOIS ${m.id}</button>
+                </div>
+            `;
+        } else {
+             html += `<div style="text-align:center; color:#555; margin-top:30px">Mois ${monthId < state.currentMonth ? 'terminé ✓' : 'verrouillé 🔒'}</div>`;
+        }
+
+        container.innerHTML = html;
     }
 
-    // --- LOGIC FUNCTIONS ---
-    function saveWeight(key, val) {
-        userState.weights[key] = val;
-        localStorage.setItem('squashApp_v2', JSON.stringify(userState));
+    function toggleTech(id) {
+        document.getElementById(`tech_${id}`).classList.toggle('open');
     }
 
-    function toggleDone(key) {
-        const checkbox = document.getElementById(key);
-        userState.completed[key] = checkbox.checked;
-        localStorage.setItem('squashApp_v2', JSON.stringify(userState));
+    function saveLog(id, val) {
+        state.logs[id] = val;
+        localStorage.setItem('squashPro_year_v1', JSON.stringify(state));
     }
 
-    // --- TIMER LOGIC (Optimized) ---
-    let timerInterval;
-    let isRunning = false;
+    function updateUI() {
+        document.getElementById('userLevelDisplay').innerText = `MOIS ${state.currentMonth}`;
+        const prog = Math.round(((state.currentMonth - 1) / 12) * 100);
+        document.getElementById('totalProg').innerText = `${prog}% Année`;
+    }
 
-    function startHIIT(workTime, restTime, totalReps) {
-        if (isRunning) return;
-        isRunning = true;
+    function openValidation(monthId) {
+        const m = DB.months.find(month => month.id === monthId);
+        document.getElementById('modalTitle').innerText = `Bilan : ${m.name}`;
+        document.getElementById('modalGoalPhys').innerText = m.test_phys;
+        document.getElementById('modalGoalTech').innerText = m.test_tech;
+        document.getElementById('validationModal').style.display = 'flex';
+    }
 
-        let currentRep = 1;
-        let isWork = false;
-        let timeLeft = 5; // Countdown initial
-        let phaseLabel = "PRÉPA";
+    function processValidation(success) {
+        document.getElementById('validationModal').style.display = 'none';
 
-        const display = document.getElementById('timerDisplay');
-        const status = document.getElementById('timerStatus');
-        const bar = document.getElementById('timerBar');
-
-        status.innerText = "PRÉPARATION";
-        status.style.color = "#ffff00";
-
-        timerInterval = setInterval(() => {
-            // Format 00:00
-            display.innerText = timeLeft < 10 ? `00:0${timeLeft}` : `00:${timeLeft}`;
-
-            // Gestion de la barre de progression
-            let maxTime = isWork ? workTime : restTime;
-            if (phaseLabel === "PRÉPA") maxTime = 5;
-            const percentage = ((maxTime - timeLeft) / maxTime) * 100;
-            bar.style.width = percentage + "%";
-            bar.style.background = isWork ? "#c6ff00" : (phaseLabel === "PRÉPA" ? "#ffff00" : "#ff4444");
-
-            // Logic de changement de phase
-            if (timeLeft <= 0) {
-                if (phaseLabel === "PRÉPA") {
-                    // Start First Sprint
-                    isWork = true;
-                    timeLeft = workTime;
-                    phaseLabel = "SPRINT";
-                    status.style.color = "#c6ff00";
-                    status.innerText = `SPRINT ${currentRep}/${totalReps}`;
-                    playBeep('go');
-                } else if (isWork) {
-                    // Start Rest
-                    isWork = false;
-                    timeLeft = restTime;
-                    phaseLabel = "REPOS";
-                    status.style.color = "#ff4444";
-                    status.innerText = `REPOS ${currentRep}/${totalReps}`;
-                    playBeep('rest');
-                } else {
-                    // End of Rest -> Next Sprint or Finish
-                    currentRep++;
-                    if (currentRep > totalReps) {
-                        finishTimer();
-                        return;
-                    }
-                    isWork = true;
-                    timeLeft = workTime;
-                    phaseLabel = "SPRINT";
-                    status.style.color = "#c6ff00";
-                    status.innerText = `SPRINT ${currentRep}/${totalReps}`;
-                    playBeep('go');
-                }
+        if (success) {
+            if (state.currentMonth < 12) {
+                state.currentMonth++;
+                alert("🔥 BOOM ! Mois validé. Niveau suivant débloqué.");
             } else {
-                // Countdown sonore (3-2-1)
-                if (timeLeft <= 3 && timeLeft > 0) playBeep('countdown');
+                alert("🏆 TU ES UNE LÉGENDE ! Année terminée. Tu es prêt pour la 3e série.");
             }
+        } else {
+            const choice = confirm("Pas de panique. La régularité bat l'intensité.\n\nVeux-tu redoubler le mois pour valider les acquis ? (OK = Redoubler / Annuler = Forcer le passage)");
+            if (!choice) {
+                if (state.currentMonth < 12) state.currentMonth++;
+            }
+        }
 
-            timeLeft--;
-        }, 1000);
+        localStorage.setItem('squashPro_year_v1', JSON.stringify(state));
+        init();
     }
 
-    function finishTimer() {
-        stopTimer();
-        const status = document.getElementById('timerStatus');
-        status.innerText = "SÉANCE TERMINÉE";
-        status.style.color = "#fff";
-        document.getElementById('timerBar').style.width = "100%";
-        document.getElementById('timerBar').style.background = "#fff";
-        playBeep('end');
-    }
-
-    function stopTimer() {
-        clearInterval(timerInterval);
-        isRunning = false;
-        document.getElementById('timerStatus').innerText = "STOPPÉ";
-        document.getElementById('timerDisplay').innerText = "00:00";
-        document.getElementById('timerBar').style.width = "0%";
-    }
-
-    // Init
-    renderApp();
+    init();
 </script>
 </body>
 </html>
