@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" fill="#121212"/>
+  <circle cx="96" cy="85" r="35" fill="#c6ff00"/>
+  <rect x="91" y="115" width="10" height="50" rx="3" fill="#c6ff00"/>
+  <text x="96" y="175" text-anchor="middle" fill="#c6ff00" font-family="Arial, sans-serif" font-size="16" font-weight="bold">3e SÉRIE</text>
+</svg>
