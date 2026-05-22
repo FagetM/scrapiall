@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PokerLingo — Apprends le poker en t'amusant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">♠</span>
+      <span class="brand-name">PokerLingo</span>
+    </div>
+    <div class="stats">
+      <div class="stat" title="Série quotidienne">
+        <span class="stat-icon">🔥</span>
+        <span class="stat-value" id="streakValue">0</span>
+      </div>
+      <div class="stat" title="Points d'expérience">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-value" id="xpValue">0</span>
+      </div>
+      <div class="stat" title="Vies restantes">
+        <span class="stat-icon">❤️</span>
+        <span class="stat-value" id="heartsValue">5</span>
+      </div>
+      <button class="icon-btn" id="resetBtn" title="Réinitialiser la progression">↺</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Home / Path view -->
+    <section id="homeView" class="view active">
+      <div class="hero">
+        <h1>Apprends le poker pas à pas</h1>
+        <p class="subtitle">Des leçons courtes, ludiques et progressives — comme Duolingo, mais pour le Texas Hold'em.</p>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="globalProgress"></div></div>
+          <span class="progress-text" id="progressText">0% complété</span>
+        </div>
+      </div>
+
+      <div class="path" id="lessonPath"></div>
+
+      <div class="footer-note">
+        <p>💡 Conseil du jour : <span id="dailyTip">Au poker, la patience est ta meilleure arme.</span></p>
+      </div>
+    </section>
+
+    <!-- Lesson view -->
+    <section id="lessonView" class="view">
+      <div class="lesson-header">
+        <button class="close-btn" id="closeLesson">✕</button>
+        <div class="lesson-progress">
+          <div class="lesson-progress-bar"><div class="lesson-progress-fill" id="lessonProgressFill"></div></div>
+        </div>
+        <div class="lesson-hearts">
+          <span>❤️</span>
+          <span id="lessonHearts">5</span>
+        </div>
+      </div>
+
+      <div class="lesson-content" id="lessonContent"></div>
+
+      <div class="lesson-footer" id="lessonFooter">
+        <div class="feedback" id="feedback"></div>
+        <button class="primary-btn" id="checkBtn" disabled>Vérifier</button>
+      </div>
+    </section>
+
+    <!-- Lesson complete view -->
+    <section id="completeView" class="view">
+      <div class="complete-card">
+        <div class="celebrate">🎉</div>
+        <h2>Leçon terminée !</h2>
+        <div class="rewards">
+          <div class="reward">
+            <span class="reward-icon">⭐</span>
+            <span class="reward-label">XP gagnés</span>
+            <span class="reward-value" id="xpGained">+0</span>
+          </div>
+          <div class="reward">
+            <span class="reward-icon">🎯</span>
+            <span class="reward-label">Précision</span>
+            <span class="reward-value" id="accuracyValue">0%</span>
+          </div>
+          <div class="reward">
+            <span class="reward-icon">⚡</span>
+            <span class="reward-label">Bonnes réponses</span>
+            <span class="reward-value" id="correctValue">0/0</span>
+          </div>
+        </div>
+        <button class="primary-btn" id="continueBtn">Continuer</button>
+      </div>
+    </section>
+
+    <!-- Game over view -->
+    <section id="gameOverView" class="view">
+      <div class="complete-card">
+        <div class="celebrate">💔</div>
+        <h2>Plus de vies !</h2>
+        <p>Tu as épuisé tes 5 cœurs. Reviens dans quelques minutes ou recommence cette leçon.</p>
+        <button class="primary-btn" id="retryBtn">Réessayer la leçon</button>
+        <button class="secondary-btn" id="backHomeBtn">Retour à l'accueil</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="lessons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
